@@ -376,7 +376,11 @@ html,body{max-width:100%;overflow-x:hidden}
    pointer on a 375px viewport), so a coarse-only gate would have been untestable here and could silently
    no-op on any browser that reports the pointer oddly. Desktop mouse users above 880px are unaffected. */
 @media (pointer: coarse), (max-width: 880px) {
-  /* .callstrip a is THE phone CTA — the top strip on every page. It measured 141x20 live. */
+  /* .callstrip a is THE phone CTA — the top strip on every page. It measured 141x20 live.
+     The strip's own vertical padding is trimmed to pay for the taller link: measured 66px before this
+     block and 86px after, so without the trim the fix would have cost 20px of above-the-fold space on
+     every page. The link now supplies the height, so the container does not need to. */
+  .callstrip { padding: 2px 12px; }
   .callstrip a, .nav-phone { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; }
   .menu-btn { min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
   .brand { min-height: 44px; display: inline-flex; align-items: center; }
