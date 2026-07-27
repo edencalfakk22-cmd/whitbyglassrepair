@@ -376,12 +376,15 @@ html,body{max-width:100%;overflow-x:hidden}
    pointer on a 375px viewport), so a coarse-only gate would have been untestable here and could silently
    no-op on any browser that reports the pointer oddly. Desktop mouse users above 880px are unaffected. */
 @media (pointer: coarse), (max-width: 880px) {
-  .nav-phone { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; }
+  /* .callstrip a is THE phone CTA — the top strip on every page. It measured 141x20 live. */
+  .callstrip a, .nav-phone { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; }
   .menu-btn { min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+  .brand { min-height: 44px; display: inline-flex; align-items: center; }
   footer.site a { min-height: 44px; display: flex; align-items: center; padding: 4px 0; }
+  address.nap a { min-height: 44px; display: inline-flex; align-items: center; }
   .chip { min-height: 44px; display: inline-flex; align-items: center; }
   .callbar a { min-height: 48px; }
-  .crumbs a { display: inline-block; padding: 8px 2px; }
+  .crumbs a { display: inline-block; padding: 13px 4px; }
 }
 /* the 880px block earlier sets .menu-btn{display:block}; inline-flex is what centres the glyph in the 44px box */
 @media (max-width: 880px) { .menu-btn { display: inline-flex } }
