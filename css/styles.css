@@ -408,3 +408,15 @@ html,body{max-width:100%;overflow-x:hidden}
 }
 /* the 880px block earlier sets .menu-btn{display:block}; inline-flex is what centres the glyph in the 44px box */
 @media (max-width: 880px) { .menu-btn { display: inline-flex } }
+
+/* ---------- Contact form position on mobile ----------
+   .quote-wrap is a two-column grid: copy left, form right. Side by side on desktop that is fine, but at
+   <=820px the grid collapses and the form lands BELOW 432 words of copy — measured 2,652px down the page,
+   roughly three and a half screens of scrolling. On a page whose entire job is the form, and which is
+   about to be a paid landing page, that is the difference between a click and a lead. Put the form first
+   on small screens; the supporting copy still follows for anyone who wants to read it. Desktop layout is
+   untouched, and source order is unchanged so the reading order for assistive tech stays sensible. */
+@media (max-width: 820px) {
+  .quote-wrap > form.quote-form { order: -1; }
+  .quote-wrap { align-items: start; }
+}
