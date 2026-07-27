@@ -369,17 +369,22 @@ html,body{max-width:100%;overflow-x:hidden}
    was 141x20 CSS px, the hamburger 35x36, footer links 335x32 and service chips 42px tall. Lighthouse
    flags anything under ~48x48 with 8px spacing as "tap targets are not sized appropriately", and on a
    call-first site paid for by the click, a 20px-tall phone link is a lead-loss bug, not a polish item.
-   Scoped to coarse pointers so mouse/desktop layout is untouched; padding-only so nothing reflows
-   horizontally. Uses min-height + inline-flex centring rather than fixed heights so long labels still wrap. */
-@media (pointer: coarse) {
+   Padding-only, so nothing reflows horizontally; min-height + inline-flex centring rather than fixed
+   heights, so long labels still wrap.
+   Gated on EITHER a coarse pointer OR the 880px breakpoint the rest of this file already uses. Width is
+   the reliable half: `pointer: coarse` does NOT match in headless Chrome (verified — it reported a fine
+   pointer on a 375px viewport), so a coarse-only gate would have been untestable here and could silently
+   no-op on any browser that reports the pointer oddly. Desktop mouse users above 880px are unaffected. */
+@media (pointer: coarse), (max-width: 880px) {
   .nav-phone { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; }
-  .menu-btn { min-width: 44px; min-height: 44px; display: none; align-items: center; justify-content: center; }
+  .menu-btn { min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
   footer.site a { min-height: 44px; display: flex; align-items: center; padding: 4px 0; }
   .chip { min-height: 44px; display: inline-flex; align-items: center; }
   .callbar a { min-height: 48px; }
+  .crumbs a { display: inline-block; padding: 8px 2px; }
 }
-/* the 880px rule above sets .menu-btn{display:block}; re-assert flex there so the centring applies */
-@media (pointer: coarse) and (max-width: 880px) { .menu-btn { display: inline-flex } }
+/* the 880px block earlier sets .menu-btn{display:block}; inline-flex is what centres the glyph in the 44px box */
+@media (max-width: 880px) { .menu-btn { display: inline-flex } }
 
 :root{--red:#c1440e;--red-dark:#c1440e;--amber:#c1440e;--accent:#c1440e}
 .callstrip{background:linear-gradient(90deg,#c1440e,#c1440e);color:#fff;text-align:center;font-weight:700;padding:9px 16px;font-size:.94rem}.callstrip a{color:#fff;text-decoration:underline;font-weight:800}.fab-call{position:fixed;right:22px;bottom:22px;z-index:60;display:inline-flex;align-items:center;gap:9px;background:var(--red);color:#fff;font-weight:800;padding:15px 22px;border-radius:999px;box-shadow:0 12px 34px rgba(0,0,0,.35);text-decoration:none;animation:fabp 2.4s infinite}@keyframes fabp{0%{box-shadow:0 0 0 0 rgba(0,0,0,.4)}70%{box-shadow:0 0 0 18px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}@media(max-width:880px){.fab-call{display:none}}
