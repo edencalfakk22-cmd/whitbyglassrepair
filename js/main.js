@@ -1,6 +1,14 @@
-/* Emerald City Builders — progressive enhancement + conversion tracking.
-   Deferred, no framework, fully usable without JS. Paste real IDs below to go live;
-   nothing loads / no cookies until then (privacy-friendly default). */
+/* Progressive enhancement + conversion tracking. Deferred, no framework, fully usable without JS.
+   Nothing loads and no cookie is set while EC_CONFIG is empty (privacy-friendly default).
+
+   DO NOT PASTE IDs INTO THIS FILE, or into the /js/main.js on a deployed site.
+   IDs belong in <trade>/packs/<slug>.json under `tracking`:
+       "tracking": { "adsId": "AW-…", "adsCallLabel": "AW-…/…", "adsFormLabel": "AW-…/…" }
+   gen.js rewrites the two anchor lines below at build time (renderKitJs) and will ABORT if it cannot
+   find them, so a hand-edit here is both overwritten on the next build and able to break the build.
+   It is also wrong in a way that costs money: the fallback line below fires the CALL label, so a
+   hand-pasted ADS_CALL_LABEL books form submissions as phone calls and Smart Bidding then optimises
+   toward a conversion type that never happened. The generated version uses two separate labels. */
 var EC_CONFIG = { GTM_ID: "", GA4_ID: "", ADS_ID: "", ADS_CALL_LABEL: "" };
 
 (function () {
@@ -45,7 +53,7 @@ var EC_CONFIG = { GTM_ID: "", GA4_ID: "", ADS_ID: "", ADS_CALL_LABEL: "" };
     var data = Object.assign({ event: name }, params || {});
     window.dataLayer.push(data);
     if (EC_CONFIG.GA4_ID && window.gtag) window.gtag("event", name, data);
-    if (EC_CONFIG.ADS_CALL_LABEL && window.gtag && (name === "phone_click" || name === "generate_lead")) window.gtag("event", "conversion", { send_to: EC_CONFIG.ADS_CALL_LABEL });
+    if (EC_CONFIG.ADS_CALL_LABEL && window.gtag && name === "phone_click") window.gtag("event", "conversion", { send_to: EC_CONFIG.ADS_CALL_LABEL });
   }
   window.ecTrack = track;
 
@@ -60,6 +68,13 @@ var EC_CONFIG = { GTM_ID: "", GA4_ID: "", ADS_ID: "", ADS_CALL_LABEL: "" };
   var quote = document.querySelector("form.quote-form");
   if (quote) quote.addEventListener("submit", function () {
     if (!quote.checkValidity()) return;
+    // PROOF-OF-SUBMIT token. The form POSTs away and Web3Forms redirects back to /thank-you/, where the
+    // lead conversion fires. Without this token ANY load of /thank-you/ counted a lead — a bookmark, a
+    // crawler, the owner checking the page. Inflated conversions are worse than none: Smart Bidding
+    // optimises toward whatever produced them. The token is written here, and /thank-you/ requires and
+    // CONSUMES it. If sessionStorage is unavailable the conversion is skipped rather than guessed —
+    // under-counting is the safe direction.
+    try { sessionStorage.setItem("ec_pending", "P" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8) + "|" + Date.now()); } catch (e) {}
     track("generate_lead", { form: "estimate", currency: "CAD", value: 100 });
     var b = quote.querySelector('button[type="submit"]'); if (b) { b.disabled = true; b.textContent = "Sending…"; }
   });
