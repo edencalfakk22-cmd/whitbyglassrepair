@@ -9,8 +9,29 @@ var EC_CONFIG = { GTM_ID: "", GA4_ID: "", ADS_ID: "", ADS_CALL_LABEL: "" };
   function gtag() { window.dataLayer.push(arguments); }
   window.gtag = window.gtag || gtag;
 
-  gtag("consent", "default", { ad_storage: "denied", analytics_storage: "denied", ad_user_data: "denied", ad_personalization: "denied", wait_for_update: 500 });
-  try { if (localStorage.getItem("ec_consent") === "granted") gtag("consent", "update", { ad_storage: "granted", analytics_storage: "granted", ad_user_data: "granted", ad_personalization: "granted" }); } catch (e) {}
+  // ---- Consent Mode v2 ----
+  // REGION-SCOPED, in this order (a later default() only overrides the regions it names):
+  //  1. global default = granted — these sites serve Ontario, Canada. Under PIPEDA, implied consent
+  //     covers non-sensitive analytics/advertising cookies that the privacy policy discloses, so a
+  //     blanket "denied" here bought no compliance and silently broke every conversion: tags fired
+  //     but reported cookieless/modelled, and enhanced conversions could never match.
+  //  2. EEA + UK + CH = denied until the visitor opts in — GDPR/ePrivacy needs PRIOR consent, and
+  //     Google's EU user-consent policy requires it for ads there. wait_for_update holds the pings.
+  // A visitor who has explicitly opted out (ec_consent = "denied") is honoured everywhere.
+  var EEA = ["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","GB","CH"];
+  gtag("consent", "default", { ad_storage: "granted", analytics_storage: "granted", ad_user_data: "granted", ad_personalization: "granted" });
+  gtag("consent", "default", { region: EEA, ad_storage: "denied", analytics_storage: "denied", ad_user_data: "denied", ad_personalization: "denied", wait_for_update: 500 });
+  try {
+    var ec = localStorage.getItem("ec_consent");
+    if (ec === "granted") gtag("consent", "update", { ad_storage: "granted", analytics_storage: "granted", ad_user_data: "granted", ad_personalization: "granted" });
+    else if (ec === "denied") gtag("consent", "update", { ad_storage: "denied", analytics_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" });
+  } catch (e) {}
+  // Opt-out hook for the privacy page: ecConsent("denied") / ecConsent("granted").
+  window.ecConsent = function (state) {
+    var g = state === "granted";
+    try { localStorage.setItem("ec_consent", g ? "granted" : "denied"); } catch (e) {}
+    gtag("consent", "update", { ad_storage: g ? "granted" : "denied", analytics_storage: g ? "granted" : "denied", ad_user_data: g ? "granted" : "denied", ad_personalization: g ? "granted" : "denied" });
+  };
 
   function loadScript(src) { var s = document.createElement("script"); s.async = true; s.src = src; document.head.appendChild(s); }
   if (EC_CONFIG.GTM_ID) {
